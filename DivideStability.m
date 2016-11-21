@@ -13,7 +13,7 @@ function [OUT]=DivideStability(DEM,FD,varargin)
 	% Optional Inputs:
 	% 		ref_area [1e6] - minimum accumulation area to define streams in meters squared and the reference area for which across divide values are
 	%			computed.
-	% 		rlf_rad [250] - radius for calculating local relief. For this purpose, the relief radius should be smaller or equal to the mean distance 
+	% 		rlf_rad [500] - radius for calculating local relief. For this purpose, the relief radius should be smaller or equal to the mean distance 
 	%			from the divide to the 'channel head', if provided radius is larger than assumed distance (square root of reference area) then a warning
 	%			will appear, but code will still run.
 	% 		verbose [false] - flag to provide output of progress through code, can be useful for larger input to files to make sure the code has not hung.
@@ -51,7 +51,7 @@ function [OUT]=DivideStability(DEM,FD,varargin)
 	addRequired(p,'FD',@(x) isa(x,'FLOWobj'));
 
 	addParamValue(p,'ref_area',1e6,@(x) isscalar(x) && isnumeric(x));
-	addParamValue(p,'rlf_rad',250,@(x) isscalar(x) && isnumeric(x));
+	addParamValue(p,'rlf_rad',500,@(x) isscalar(x) && isnumeric(x));
 	addParamValue(p,'verbose',false,@(x) isscalar(x));
 	addParamValue(p,'shape_name','div_stabil',@(x) ischar(x));
 	addParamValue(p,'chi_ref_area',1,@(x) isscalar(x) && isnumeric(x));
@@ -169,15 +169,4 @@ function [OUT]=DivideStability(DEM,FD,varargin)
 	OUT.Stream=S;
 	OUT.Ref_Area=ref_area;
 
-
-
-
-
-
-
-
-
-
-
-
-
+end
