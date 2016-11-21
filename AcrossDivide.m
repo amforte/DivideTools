@@ -36,7 +36,7 @@ function [head_vals]=AcrossDivide(DEM,FD,DS_OUT,varargin)
     %       river_mouths - mx3 array with columns x,y, and a 1 or 2 indicating which side of the divide that particular pour point is on. Required input for 'outlet_method','picked_outlets'
     %       save_drainage_basins [false] - flag to output a shapefile of the drainage basins used to define the divide (true) or to not save them (false - default)
     %       drainage_basin_name ['basinsDivide'] - name for shapefile of drainage basins, input is ignored if 'save_drainage_basins' is set to false, do not include .shp name in the name
-    %       plot_style [points] - method of displaying divide output metrics, either 'points' or 'histograms'
+    %       plot_style [histograms] - method of displaying divide output metrics, either 'points' or 'histograms'
     %       save_plot [false] - save the divide stability plot, if true will use the name provided for 'drainage_basin_name'.
     % Outputs:
     %       head_vals - mx7 array with columns x and y coordinates of relevant channel heads, mean upstream elevation, mean upstream gradient, mean upstream relief, and chi at these channel heads
@@ -64,7 +64,7 @@ function [head_vals]=AcrossDivide(DEM,FD,DS_OUT,varargin)
     addParamValue(p,'wl_method','std_dev',@(x) ischar(validatestring(x,{'std_dev','std_err'})));
     addParamValue(p,'save_drainage_basins',false,@(x) islogical(x));
     addParamValue(p,'drainage_basin_name','basinsDivide',@(x) ischar(x));
-    addParamValue(p,'plot_style','points',@(x) ischar(validatestring(x,{'points','histograms'})));
+    addParamValue(p,'plot_style','histograms',@(x) ischar(validatestring(x,{'points','histograms'})));
     addParamValue(p,'save_plot',false,@(x) islogical(x));
 
     parse(p,DEM,FD,DS_OUT,varargin{:});
