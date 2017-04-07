@@ -24,10 +24,11 @@ function [head_vals]=AcrossDivide(DEM,FD,DS_OUT,varargin)
     %               these is still computed from the original full stream newtork provided to the code
     %           'picked_outlets' - short circuits the gui selection of drainage basins that happens with other 'outlet-method' options and allows the user to provide a list of pour points
     %               that define the drainage basins which share the divide of interest. This option requires that the user also supply an input for the optional 'river_mouths' option. This
-    %               input can either be (1) a mx3 array with columns x, y, and either a 1 or 2 or (2) the path to a valid shapefile. Coordinates for either should be the same as the projection 
-    %               used in the DEM file. If a shapefile, the file must be a point file and must only have one value column containing either 1s or 2s. For either type of input, the columns of 1s or 2s 
-    %               groups basins into being on the same side of the divide, e.g. all the provided pour points with a 1 in the third column are all on one side of the divide of interest, all the pour
-    %               points with a 2 in the third column are on the opposite of the divide.
+    %               input can either be (1) a mx3 array with columns x, y, and pairs of numbers defining particular divides of (2) the path to a valid shapefile. Coordinates for either should be the same 
+    %		    as the projection used in the DEM file. If a shapefile, the file must be a point file and must only have one value column. For either type of input, the third columns of numbers 
+    %               groups basins into being on the same side of a divide, e.g. all the provided pour points with a 1 in the third column are all on one side of a divide of interest, all the pour
+    %               points with a 2 in the third column are on the opposite of the divide. Can provide any number of divide pairs, but must always define both sides of a divide so the maximum value 
+    %		    in this third column must be even, e.g. pour points with numbers 1,2,3,4,5,6,7,8 would define 4 divide pairs 1-2, 3-4, 5-6, 7-8.
     %       divide_buffer ['moderate'] - switch to control distance between channel heads within selected basins that are considered to define the divide, options are 
     %               'conservative', 'moderate', and 'lax' with increasing acceptable distance
     %       wl_method ['std_dev'] - switch to determine restrictiveness of criteria for defining whether a divide is stable, 'std_dev' uses the standard deviation to determine if the means of
@@ -42,7 +43,7 @@ function [head_vals]=AcrossDivide(DEM,FD,DS_OUT,varargin)
     %       display_map [true] - display map of selected channel heads (optional argument only recognized if 'outlet_method' is 'picked_outlets' to supress display of map figure)
     % Outputs:
     %       head_vals - mx7 array with columns x and y coordinates of relevant channel heads, mean upstream elevation, mean upstream gradient, mean upstream relief, and chi at these channel heads
-    %           and an identifying number (1 or 2) to indicate which channel heads are grouped together on one or the other side of a divide
+    %           and an identifying number (e.g. 1, 2, 3, 4,...) to indicate which channel heads are grouped together on one or the other side of a divide
     %           
     % Examples:
     %       [channel_head_values]=AcrossDivide(DEM,FD,DivStabil_OUT);
