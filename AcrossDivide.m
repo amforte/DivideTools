@@ -665,7 +665,7 @@ function [head_vals]=AcrossDivide(DEM,FD,DS_OUT,varargin)
             end
         % Loop end
         end
-        head_vals=vertcat(head_vals{:})
+        head_vals=vertcat(head_vals{:});
     else
         % Determine Channel Heads of Interest
         num1=numel(chX1);
@@ -1001,7 +1001,7 @@ function [head_vals]=AcrossDivide(DEM,FD,DS_OUT,varargin)
             StreamSgmnts=cell(num_heads,1);
             ChiSgmnts=cell(num_heads,1);
             for ii=1:num_heads
-                chOI=[x1(ii) y1(ii)];
+                chOI=[x(ii) y(ii)];
 
                 % Build logical raster
                 ix=coord2ind(DEM,chOI(:,1),chOI(:,2));
