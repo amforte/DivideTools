@@ -987,6 +987,7 @@ function [head_vals]=AcrossDivide(DEM,FD,DS_OUT,varargin)
         DEMc=GRIDobj(DEM);
         DEMc.Z(DEMc.Z==0)=NaN;
         DEMc.Z(S.IXgrid)=zc;
+	A=flowacc(FD);
 
         w1=waitbar(0,'Extracting stream segments...');
         StreamSegments=struct;
