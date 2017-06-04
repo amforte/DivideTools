@@ -1014,7 +1014,7 @@ function [head_vals]=AcrossDivide(DEM,FD,DS_OUT,varargin)
                 % Extract stream from channel head to outlet
                 Sn=modify(S,'downstreamto',IX);
 
-                C=chiplot(Sn,DEMc,A,'a0',1,'mn',theta_ref,'plot',false);
+                C=chiplot(Sn,DEMc,A,'a0',a0,'mn',mn,'plot',false);
 
                 StreamSgmnts{ii}=Sn;
                 ChiSgmnts{ii}=C;
