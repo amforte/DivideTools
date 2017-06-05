@@ -99,7 +99,7 @@ function PlotDivideProfiles(head_vals,StreamSegments,varargin)
 			[pos1,pos2,ab1,ab2]=DivideOrient(x1,y1,x2,y2);
 
 			f1=figure(fig_num);
-			set(f1,'Units','inches','Position',[1.0 1.5 10 10],'renderer','painters','PaperSize',[10 10],'PaperPositionMode','auto');
+			set(f1,'Units','normalized','Position',[0.1 0.1 0.75 0.75],'renderer','painters','PaperSize',[10 10],'PaperPositionMode','auto');
 			clf
 			colormap(jet);
 
@@ -324,7 +324,7 @@ function PlotDivideProfiles(head_vals,StreamSegments,varargin)
 
 
 			f1=figure(fig_num);
-			set(f1,'Units','inches','Position',[1.0 1.5 10 10],'renderer','painters','PaperSize',[10 10],'PaperPositionMode','auto');
+			set(f1,'Units','normalized','Position',[0.1 0.1 0.75 0.75],'renderer','painters','PaperSize',[10 10],'PaperPositionMode','auto');
 			clf
 			colormap(jet);
 
