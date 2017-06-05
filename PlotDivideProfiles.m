@@ -84,7 +84,7 @@ function PlotDivideProfiles(head_vals,StreamSegments,varargin)
 			idx2=divide_nums==evens(ii);
 
 			x1=chX(idx1); x2=chX(idx2);
-			y1=chX(idx1); y2=chX(idx2);
+			y1=chY(idx1); y2=chY(idx2);
 			id1=chID(idx1); id2=chID(idx2);
 			g1=chG(idx1); g2=chG(idx2);
 			r1=chR(idx1); r2=chR(idx2);
@@ -292,7 +292,7 @@ function PlotDivideProfiles(head_vals,StreamSegments,varargin)
 			idx2=divide_nums==evens(ii);
 
 			x1=chX(idx1); x2=chX(idx2);
-			y1=chX(idx1); y2=chX(idx2);
+			y1=chY(idx1); y2=chY(idx2);
 			id1=chID(idx1); id2=chID(idx2);
 			g1=chG(idx1); g2=chG(idx2);
 			r1=chR(idx1); r2=chR(idx2);
