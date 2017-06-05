@@ -77,8 +77,8 @@ function PlotDivideProfiles(head_vals,StreamSegments,varargin)
 
     if isempty(chL)
 		for ii=1:num_divides
-			C1=StreamSegments(odds(ii),1).Chi;
-			C2=StreamSegments(evens(ii),1).Chi;		
+			C1=StreamSegments(odds(ii),1).Chi; C1.distance=C1.distance./1000;
+			C2=StreamSegments(evens(ii),1).Chi; C2.distance=C2.distance./1000;		
 
 			idx1=divide_nums==odds(ii);
 			idx2=divide_nums==evens(ii);
@@ -283,8 +283,8 @@ function PlotDivideProfiles(head_vals,StreamSegments,varargin)
 		end
 	else
 		for ii=1:num_divides
-			C1=StreamSegments(odds(ii),1).Chi;
-			C2=StreamSegments(evens(ii),1).Chi;		
+			C1=StreamSegments(odds(ii),1).Chi; C1.distance=C1.distance./1000;
+			C2=StreamSegments(evens(ii),1).Chi; C2.distance=C2.distance./1000;		
 
 			idx1=divide_nums==odds(ii);
 			idx2=divide_nums==evens(ii);
