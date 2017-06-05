@@ -77,8 +77,8 @@ function PlotDivideProfiles(head_vals,StreamSegments,varargin)
 
     if isempty(chL)
 		for ii=1:num_divides
-			C1=StreamSegments(odds(ii),1).Chi; C1.distance=C1.distance./1000;
-			C2=StreamSegments(evens(ii),1).Chi; C2.distance=C2.distance./1000;		
+			C1=StreamSegments(odds(ii),1).Chi;
+			C2=StreamSegments(evens(ii),1).Chi;		
 
 			idx1=divide_nums==odds(ii);
 			idx2=divide_nums==evens(ii);
@@ -105,7 +105,8 @@ function PlotDivideProfiles(head_vals,StreamSegments,varargin)
 
 			for jj=1:num_seg1
 				C=C1{jj};
-
+				C.distance=C.distance./1000;
+				
 				subplot(2,1,1);
 				hold on
 				switch color_by
@@ -171,7 +172,8 @@ function PlotDivideProfiles(head_vals,StreamSegments,varargin)
 
 			for jj=1:num_seg2
 				C=C2{jj};
-
+				C.distance=C.distance./1000;
+				
 				subplot(2,1,1);
 				hold on
 				switch color_by
@@ -257,7 +259,7 @@ function PlotDivideProfiles(head_vals,StreamSegments,varargin)
 
 			subplot(2,1,2);
 			hold on
-				xlabel('Distance from Mouth (m)')
+				xlabel('Distance from Mouth (km)')
 				ylabel('Elevation (m)')
 				title('Long Profile')
 				legend(p2,LegendEnt,'location','best');
@@ -283,8 +285,8 @@ function PlotDivideProfiles(head_vals,StreamSegments,varargin)
 		end
 	else
 		for ii=1:num_divides
-			C1=StreamSegments(odds(ii),1).Chi; C1.distance=C1.distance./1000;
-			C2=StreamSegments(evens(ii),1).Chi; C2.distance=C2.distance./1000;		
+			C1=StreamSegments(odds(ii),1).Chi;
+			C2=StreamSegments(evens(ii),1).Chi;		
 
 			idx1=divide_nums==odds(ii);
 			idx2=divide_nums==evens(ii);
@@ -330,6 +332,7 @@ function PlotDivideProfiles(head_vals,StreamSegments,varargin)
 
 			for jj=1:num_seg1
 				C=C1{jj};
+				C.distance=C.distance./1000;				
 
 				subplot(2,1,1);
 				hold on
@@ -396,6 +399,7 @@ function PlotDivideProfiles(head_vals,StreamSegments,varargin)
 
 			for jj=1:num_seg2
 				C=C2{jj};
+				C.distance=C.distance./1000;				
 
 				subplot(2,1,1);
 				hold on
@@ -482,7 +486,7 @@ function PlotDivideProfiles(head_vals,StreamSegments,varargin)
 
 			subplot(2,1,2);
 			hold on
-				xlabel('Distance from Mouth (m)')
+				xlabel('Distance from Mouth (km)')
 				ylabel('Elevation (m)')
 				title('Long Profile')
 				legend(p2,LegendEnt,'location','best');
