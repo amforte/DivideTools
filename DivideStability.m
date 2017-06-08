@@ -54,9 +54,9 @@ function [OUT]=DivideStability(DEM,FD,varargin)
 	%		[AREA_OUT]=DivideStability(DEM,FD); 
 	%		[AREA_OUT]=DivideStability(DEM,FD,'verbose',true,'ref_area',1e7,'rlf_rad',500); 
 	%
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	% Function Written by Adam M. Forte - Last Revised Fall 2016 %
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	% Function Written by Adam M. Forte - Last Revised Summer 2017 %
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 	p=inputParser;
 	p.FunctionName = 'DivideStability';
@@ -168,20 +168,53 @@ function [OUT]=DivideStability(DEM,FD,varargin)
 	UpGN=UpGN/maxG;
 	UpRN=UpRN/maxR;
 
-	% Saving Shapefile
-	if verbose
-		waitbar(10/12,w1,'Building Shapefile');
-	end	
-	MS=STREAMobj2mapstruct(S,'seglength',DEM.cellsize*3,'attributes',...
-	{'chan_elev' UpEN @max 'slope' UpGN @max 'relief' UpRN @max 'chi' CHI @max});
-	if verbose
-		waitbar(11/12,w1,'Saving Shapefile');
-	end	
-	fileName=[shape_name '.shp'];
-	shapewrite(MS,fileName); 
-	if verbose
-		waitbar(12/12,w1,'Saving Shapefile');
-		close(w1);
+	% Saving GIS Output
+	v=ver;
+	ix=find(strcmp(cellstr(char(v.Name)),'Mapping Toolbox'));
+	if isempty(ix)
+		warning('You do not have a license for the Mapping Toolbox, cannot generate shapefiles so outputs will be generated as ASCII rasters')
+		if verbose
+			waitbar(10/12,w1,'Building Rasters');
+		end	
+
+		UpENout=GRIDobj(DEM); UpENout.Z(UpENout.Z==0)=NaN;
+		UpGNout=GRIDobj(DEM); UpGNout.Z(UpGNout.Z==0)=NaN;
+		UpRNout=GRIDobj(DEM); UpRNout.Z(UpRNout.Z==0)=NaN;
+		CHIout=GRIDobj(DEM); ChiOut.Z(CHIout.Z==0)=NaN;
+
+		UpENout.Z(S.IXgrid)=UpEN.Z(S.IXgrid);
+		UpGNout.Z(S.IXgrid)=UpGN.Z(S.IXgrid);
+		UpRNout.Z(S.IXgrid)=UpRN.Z(S.IXgrid);
+		CHIout.Z(S.IXgrid)=CHI.Z(S.IXgrid);
+
+		if verbose
+			waitbar(11/12,w1,'Saving Rasters as ASCII');
+		end	
+
+		GRIDobj2ascii(UpENout,[shape_name '_elev.txt']);
+		GRIDobj2ascii(UpGNout,[shape_name '_grad.txt']);		
+		GRIDobj2ascii(UpRNout,[shape_name '_rlf.txt']);
+		GRIDobj2ascii(CHIout,[shape_name '_chi.txt']);
+
+		if verbose
+			waitbar(12/12,w1,'Saving Rasters as ASCII');
+			close(w1);
+		end	
+	else
+		if verbose
+			waitbar(10/12,w1,'Building Shapefile');
+		end	
+		MS=STREAMobj2mapstruct(S,'seglength',DEM.cellsize*3,'attributes',...
+		{'chan_elev' UpEN @max 'slope' UpGN @max 'relief' UpRN @max 'chi' CHI @max});
+		if verbose
+			waitbar(11/12,w1,'Saving Shapefile');
+		end	
+		fileName=[shape_name '.shp'];
+		shapewrite(MS,fileName); 
+		if verbose
+			waitbar(12/12,w1,'Saving Shapefile');
+			close(w1);
+		end	
 	end	
 
 	% Process GRIDs and extract values at channel heads for use in AcrossDivide tool
