@@ -2,7 +2,7 @@ function AlongDividePlot(head_vals,varargin)
     % Function produces plots of values of the four divide metrics along a series of divide segments. Will function if only one divide segment
     % is defined, but is really only useful when multiple divide segments have been defined. Will produce three plots (1) a plot of mean and
     % standard deviation values for both sides of a divide, (2) delta values for each of the four metrics along with propagated uncertainty, and (3)
-    % a pseuod normalized delta plot (e.g. positive delta values for all metrics imply the same direction of divide motion).
+    % a standardized delta plot (e.g. positive delta values for all metrics imply the same direction of divide motion).
     %
     % If you use the result of this code in a publication, please cite Forte, A.M. & Whipple, K.X., In Review, Criteria and Tools for Determining
     % Drainage Divide Stability, submitted to EPSL.
