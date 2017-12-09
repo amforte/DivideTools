@@ -5,7 +5,7 @@ function AlongDividePlot(head_vals,varargin)
     % a standardized delta plot (e.g. positive delta values for all metrics imply the same direction of divide motion).
     %
     % If you use the result of this code in a publication, please cite Forte, A.M. & Whipple, K.X., In Review, Criteria and Tools for Determining
-    % Drainage Divide Stability, submitted to EPSL.
+    % Drainage Divide Stability, submitted to EPSL. And while it's in review, check out the supporting text in preprint form at https://eartharxiv.org/anr29
     %
     % Required Inputs:
     %       head_vals - output of 'AcrossDivide' function
