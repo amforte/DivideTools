@@ -2,7 +2,7 @@ function PlotDivideProfiles(head_vals,StreamSegments,varargin)
     % Function plots chi-elevation and distance-elevation profiles for the streams used to evaluate a divide section with the 'AcrossDivide' code.
     %
 	% If you use the result of this code in a publication, please cite Forte, A.M. & Whipple, K.X., In Review, Criteria and Tools for Determining
-	% Drainage Divide Stability, submitted to EPSL.
+	% Drainage Divide Stability, submitted to EPSL. And while it's in review, check out the supporting text in preprint form at https://eartharxiv.org/anr29
     %
     % Required Inputs:
     %       head_vals - m x 8 matrix output from 'AcrossDivide' or saved in the '*_head_vals.mat' file if the optional 'save_heads' parameter was
