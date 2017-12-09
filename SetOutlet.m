@@ -2,7 +2,7 @@ function [SC]=SetOutlet(DEM,FD,A,S,method,varargin)
 	% Function to adjust outlet elevation of streams within a network and ensure network is complete for chi analysis.
 	%
 	% If you use the result of this code in a publication, please cite Forte, A.M. & Whipple, K.X., In Review, Criteria and Tools for Determining
-	% Drainage Divide Stability, submitted to EPSL.
+	% Drainage Divide Stability, submitted to EPSL. And while it's in review, check out the supporting text in preprint form at https://eartharxiv.org/anr29
 	% 
 	% Reqiured Inputs:
 	% 	DEM - DEM Grid Object (assumes unconditioned DEM)
