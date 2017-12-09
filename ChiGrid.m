@@ -3,7 +3,7 @@ function [ChiOBJ]=ChiGrid(DEM,FD,varargin)
 	% completeness as the companion code 'SetOutlet' which is designed to modify a stream network.
 	%
 	% If you use this the result of this code in a publication, please cite Forte, A.M. & Whipple, K.X., In Review, Criteria and Tools for Determining
-	% Drainage Divide Stability, submitted to EPSL.
+	% Drainage Divide Stability, submitted to EPSL. And while it's in review, check out the supporting text in preprint form at https://eartharxiv.org/anr29
 	%
 	% Reqiured Inputs:
 	% 	DEM - DEM Grid Object (assumes unconditioned DEM)
