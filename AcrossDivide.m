@@ -6,7 +6,7 @@ function [head_vals]=AcrossDivide(DEM,FD,DS_OUT,varargin)
     % which direction the divide is predicted to move based on that metric. 
     %
     % If you use the result of this code in a publication, please cite Forte, A.M. & Whipple, K.X., In Review, Criteria and Tools for Determining
-    % Drainage Divide Stability, submitted to EPSL.
+    % Drainage Divide Stability, submitted to EPSL. And while it's in review, check out the supporting text in preprint form at https://eartharxiv.org/anr29
     %
     % Required Inputs:
     %       DEM - GRIDobj of the digital elevation model of your area loaded into the workspace
