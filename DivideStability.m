@@ -29,6 +29,8 @@ function [OUT]=DivideStability(DEM,FD,varargin)
 	%				'max_out_elevation' - uses the maximum elevation of all stream outlets to extract streams only above this elevation
 	%				'complete_only' - does not change outlet elevations, but removes any drainages that are incomplete
 	%		'min_elevation' [] - parameter to set minimum elevation for base level, required if 'base_level_control' is set to 'elevation'
+	%		grids [false] - flag to force code to output ascii grids as opposed to shapefiles
+	%
 	% Outputs:
 	%		OUT - Structure with the following fields:
 	%			chXY - xy coordinates of channel heads
@@ -67,6 +69,7 @@ function [OUT]=DivideStability(DEM,FD,varargin)
 	addParamValue(p,'outlet_control','none',@(x) ischar(validatestring(x,{'none','elevation','max_out_elevation','complete_only'})));
 	addParamValue(p,'min_elevation',[],@(x) isnumeric(x));
 	addParamValue(p,'max_drainage_area',[],@(x) isnumeric(x));
+	addParamValue(p,'grids',false,@(x) isscalar(x));
 
 	parse(p,DEM,FD,varargin{:});
 	DEM=p.Results.DEM;
@@ -81,6 +84,7 @@ function [OUT]=DivideStability(DEM,FD,varargin)
 	bsl=p.Results.outlet_control;
 	me=p.Results.min_elevation;
 	ma=p.Results.max_drainage_area;
+	grids=p.Results.grids;
 
 	if rlf_rad>sqrt(ref_area);
 		warning('Radius for calculating local relief is larger than mean hilllslope length from reference area, consider decreasing relief radius or increasing reference area to avoid significant across divide smearing of local relief values')
@@ -164,7 +168,7 @@ function [OUT]=DivideStability(DEM,FD,varargin)
 	% Saving GIS Output
 	v=ver;
 	ix=find(strcmp(cellstr(char(v.Name)),'Mapping Toolbox'));
-	if isempty(ix)
+	if isempty(ix) | grids
 		warning('You do not have a license for the Mapping Toolbox, cannot generate shapefiles so outputs will be generated as ASCII rasters')
 		if verbose
 			waitbar(10/12,w1,'Building Rasters');
