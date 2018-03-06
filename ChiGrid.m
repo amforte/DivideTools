@@ -13,7 +13,7 @@ function [ChiOBJ]=ChiGrid(DEM,FD,varargin)
 	%	adjust_outlet_elevation [false] - if true will only calculate chi above a given minimum elevation, that you must provide as an argument to the 
 	%									'min_elevation' parameter.
 	%	min_elevation [] - parameter to set minimum elevation for outlet elevation if 'method' is set to 'elevation'
-	%	complete_network_only [true] - if true (default) the code will only populate portions of the stream network that are complete
+	%	complete_networks_only [true] - if true (default) the code will only populate portions of the stream network that are complete
 	%	chi_ref_area [1] - reference area for calculating chi, setting this value to 1 will ensure that slope of the chi-z relationship is equivalent to 
 	%			to ksn, but for this function, this value doesn't matter too much
 	%	theta_ref [0.5] - reference concavity for calculating chi
