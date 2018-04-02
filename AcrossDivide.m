@@ -6,7 +6,7 @@ function [head_vals]=AcrossDivide(DEM,FD,DS_OUT,varargin)
     % which direction the divide is predicted to move based on that metric. 
     %
     % If you use the result of this code in a publication, please cite Forte, A.M. & Whipple, K.X., In Review, Criteria and Tools for Determining
-    % Drainage Divide Stability, submitted to EPSL. And while it's in review, check out the supporting text in preprint form at https://eartharxiv.org/anr29
+    % Drainage Divide Stability, submitted to EPSL.
     %
     % Required Inputs:
     %       DEM - GRIDobj of the digital elevation model of your area loaded into the workspace
@@ -32,7 +32,8 @@ function [head_vals]=AcrossDivide(DEM,FD,DS_OUT,varargin)
     %       divide_buffer ['moderate'] - switch to control distance between channel heads within selected basins that are considered to define the divide, options are 
     %               'conservative', 'moderate', and 'lax' with increasing acceptable distance
     %       wl_method ['std_dev'] - switch to determine restrictiveness of criteria for defining whether a divide is stable, 'std_dev' uses the standard deviation to determine if the means of
-    %               a give metric overlap, alternatively 'std_err' uses the standard error, and 'bootstrap' uses the 95% confidence interval from a normal bootstrap statistic.
+    %               a give metric overlap, alternatively 'std_err' uses the standard error, 'bootstrap' uses the 95% confidence interval from a normal bootstrap statistic, and 'ttest' uses a
+    %               paired t-test to assess whether the means overlap.
     %       minimum_order [3] - minimum stream order for either defining which confluences should be used to define drainage basins ('outlet_method','streamorder') or how much to downsample the
     %           stream network for plotting purposes ('outlet_method','pick_new_outlets').
     %       river_mouths - mx3 array with columns x,y, and a series of even and odd numbers (e.g., 1,2,3,4) indicating which side of the divide that particular pour point is on. Required input for 
@@ -59,7 +60,7 @@ function [head_vals]=AcrossDivide(DEM,FD,DS_OUT,varargin)
     %       [channel_head_values]=AcrossDivide(DEM,FD,DivStabil_OUT,'outlet_method','picked_outlets','river_mouths','name_of_shape_file'); % DO NOT APPEND THE .shp TO THE NAME OF THE FILE
     %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Function Written by Adam M. Forte - Last Revised Winter 2017 %
+    % Function Written by Adam M. Forte - Last Revised Spring 2018 %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     p=inputParser;
@@ -72,7 +73,7 @@ function [head_vals]=AcrossDivide(DEM,FD,DS_OUT,varargin)
     addParamValue(p,'river_mouths',[],@(x) (isnumeric(x) && size(x,2)==3) | ischar(x));
     addParamValue(p,'minimum_order',3,@(x) isscalar(x) && isnumeric(x));
     addParamValue(p,'divide_buffer','moderate',@(x) ischar(validatestring(x,{'conservative','moderate','lax'})));
-    addParamValue(p,'wl_method','std_dev',@(x) ischar(validatestring(x,{'std_dev','std_err','bootstrap'})));
+    addParamValue(p,'wl_method','std_dev',@(x) ischar(validatestring(x,{'std_dev','std_err','bootstrap','ttest'})));
     addParamValue(p,'save_shape_files',false,@(x) islogical(x));
     addParamValue(p,'out_file_name','basinsDivide',@(x) ischar(x));
     addParamValue(p,'plot_style','histograms',@(x) ischar(validatestring(x,{'points','histograms'})));
@@ -465,6 +466,9 @@ function [head_vals]=AcrossDivide(DEM,FD,DS_OUT,varargin)
             case 'std_dev'
                 stdE1=std(E1); stdG1=std(G1); stdR1=std(R1); stdC1=std(C1);
                 stdE2=std(E2); stdG2=std(G2); stdR2=std(R2); stdC2=std(C2);
+            case 'ttest'
+                stdE1=std(E1); stdG1=std(G1); stdR1=std(R1); stdC1=std(C1);
+                stdE2=std(E2); stdG2=std(G2); stdR2=std(R2); stdC2=std(C2);
             case 'std_err'
                 stdE1=std(E1)/sqrt(numel(E1)); stdG1=std(G1)/sqrt(numel(G1)); stdR1=std(R1)/sqrt(numel(R1)); stdC1=std(C1)/sqrt(numel(C1));
                 stdE2=std(E2)/sqrt(numel(E2)); stdG2=std(G2)/sqrt(numel(G2)); stdR2=std(R2)/sqrt(numel(R2)); stdC2=std(C2)/sqrt(numel(C2));
@@ -753,6 +757,9 @@ function [head_vals]=AcrossDivide(DEM,FD,DS_OUT,varargin)
 
         switch wl_method
         case 'std_dev'
+            stdE1=std(E1); stdG1=std(G1); stdR1=std(R1); stdC1=std(C1);
+            stdE2=std(E2); stdG2=std(G2); stdR2=std(R2); stdC2=std(C2);
+        case 'ttest'
             stdE1=std(E1); stdG1=std(G1); stdR1=std(R1); stdC1=std(C1);
             stdE2=std(E2); stdG2=std(G2); stdR2=std(R2); stdC2=std(C2);
         case 'std_err'
@@ -1172,6 +1179,58 @@ function [WL]=WinnersLosers(E1,E2,G1,G2,R1,R2,C1,C2,wl_method)
             WL.C_AV1=1; % Aggressor
             WL.C_AV2=2; % Victim
         elseif MC1>MC2 && (MC1)>(MC2+stdC2) && (MC1-stdC1)>(MC2);
+            WL.C_AV1=2;
+            WL.C_AV2=1;
+        else
+            WL.C_AV1=3; % Stable
+            WL.C_AV2=3;
+        end
+
+case 'ttest'
+        WL=struct;
+
+        [Et,~]=ttest2(E1,E2,'Vartype','unequal');
+        [Gt,~]=ttest2(G1,G2,'Vartype','unequal');  
+        [Rt,~]=ttest2(R1,R2,'Vartype','unequal');  
+        [Ct,~]=ttest2(C1,C2,'Vartype','unequal');    
+
+        if ME1<ME2 && Et~=0;
+            WL.E_AV1=1; % Aggressor
+            WL.E_AV2=2; % Victim
+        elseif ME1>ME2 && Et~=0;
+            WL.E_AV1=2;
+            WL.E_AV2=1;
+        else
+            WL.E_AV1=3; % Stable
+            WL.E_AV2=3;
+        end
+            
+        if MG1>MG2 && Gt~=0;
+            WL.G_AV1=1;
+            WL.G_AV2=2;
+        elseif MG1<MG2 && Gt~=0;
+            WL.G_AV1=2;
+            WL.G_AV2=1;
+        else
+            WL.G_AV1=3;
+            WL.G_AV2=3;
+        end
+
+        if MR1>MR2 && Rt~=0;
+            WL.R_AV1=1;
+            WL.R_AV2=2;
+        elseif MR1<MR2 && Rt~=0;
+            WL.R_AV1=2;
+            WL.R_AV2=1;
+        else
+            WL.R_AV1=3;
+            WL.R_AV2=3;
+        end
+
+        if MC1<MC2 && Ct~=0;
+            WL.C_AV1=1; % Aggressor
+            WL.C_AV2=2; % Victim
+        elseif MC1>MC2 && Ct~=0;
             WL.C_AV1=2;
             WL.C_AV2=1;
         else
