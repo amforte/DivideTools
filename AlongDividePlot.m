@@ -2,29 +2,30 @@ function AlongDividePlot(head_vals,varargin)
     % Function produces plots of values of the four divide metrics along a series of divide segments. Will function if only one divide segment
     % is defined, but is really only useful when multiple divide segments have been defined. Will produce three plots (1) a plot of mean and
     % standard deviation values for both sides of a divide, (2) delta values for each of the four metrics along with propagated uncertainty, and (3)
-    % a standardized delta plot (e.g. positive delta values for all metrics imply the same direction of divide motion).
+    % a pseuod normalized delta plot (e.g. positive delta values for all metrics imply the same direction of divide motion).
     %
     % If you use the result of this code in a publication, please cite Forte, A.M. & Whipple, K.X., In Review, Criteria and Tools for Determining
-    % Drainage Divide Stability, submitted to EPSL. And while it's in review, check out the supporting text in preprint form at https://eartharxiv.org/anr29
+    % Drainage Divide Stability, submitted to EPSL.
     %
     % Required Inputs:
     %       head_vals - output of 'AcrossDivide' function
     % Optional Inputs:
     %       wl_method ['std_dev'] - switch to determine restrictiveness of criteria for defining whether a divide is stable, 'std_dev' uses the standard deviation to determine if the means of
-    %               a give metric overlap, alternatively 'std_err' uses the standard error, and 'bootstrap' uses the 95% confidence interval from a normal bootstrap statistic.
+    %               a give metric overlap, alternatively 'std_err' uses the standard error, 'bootstrap' uses the 95% confidence interval from a normal bootstrap statistic, and 'ttest' uses a
+    %               paired t-test to assess whether the means overlap.
     %		prefix ['DIV'] - text prefix for naming divide segments in the resulting plots
     %		side_1_name ['Side 1'] - text to name the side of the divide with odd number pour points, e.g. 'North' or 'Interior of Plateau'
     %		side_2_name ['Side 2'] - text to name the side of the divide with even number pour points, e.g. 'South' or 'Exterior of Plateau'
     %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Function Written by Adam M. Forte - Last Revised Winter 2017 %
+    % Function Written by Adam M. Forte - Last Revised Spring 2018 %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 	p=inputParser;
     p.FunctionName = 'AlongDividePlot';
     addRequired(p,'head_vals',@(x) isnumeric(x) & size(x,2)==8 );
 
-    addParamValue(p,'wl_method','std_dev',@(x) ischar(validatestring(x,{'std_dev','std_err','bootstrap'})));
+    addParamValue(p,'wl_method','std_dev',@(x) ischar(validatestring(x,{'std_dev','std_err','bootstrap','ttest'})));
     addParamValue(p,'prefix','DIV',@(x) ischar(x));
     addParamValue(p,'side_1_name','Side 1', @(x) ischar(x));
     addParamValue(p,'side_2_name','Side 2', @(x) ischar(x));   
@@ -88,6 +89,9 @@ function AlongDividePlot(head_vals,varargin)
 
         switch wl_method
         case 'std_dev'
+            stdE1=std(E1); stdG1=std(G1); stdR1=std(R1); stdC1=std(C1);
+            stdE2=std(E2); stdG2=std(G2); stdR2=std(R2); stdC2=std(C2);
+        case 'ttest'
             stdE1=std(E1); stdG1=std(G1); stdR1=std(R1); stdC1=std(C1);
             stdE2=std(E2); stdG2=std(G2); stdR2=std(R2); stdC2=std(C2);
         case 'std_err'
@@ -468,80 +472,204 @@ function [WL]=WinnersLosers(E1,E2,G1,G2,R1,R2,C1,C2,wl_method)
     case 'std_dev'
         stdE1=std(E1); stdG1=std(G1); stdR1=std(R1); stdC1=std(C1);
         stdE2=std(E2); stdG2=std(G2); stdR2=std(R2); stdC2=std(C2);
+        WL=struct;
+
+        if ME1<ME2 && (ME1)<(ME2-stdE2) && (ME1+stdE1)<(ME2);
+            WL.E_AV1=1; % Aggressor
+            WL.E_AV2=2; % Victim
+        elseif ME1>ME2 && (ME1)>(ME2+stdE2) && (ME1-stdE1)>(ME2);
+            WL.E_AV1=2;
+            WL.E_AV2=1;
+        else
+            WL.E_AV1=3; % Stable
+            WL.E_AV2=3;
+        end
+            
+        if MG1>MG2 && (MG1)>(MG2+stdG2) && (MG1-stdG1)>(MG2);
+            WL.G_AV1=1;
+            WL.G_AV2=2;
+        elseif MG1<MG2 && (MG1)<(MG2-stdG2) && (MG1+stdG1)<(MG2);
+            WL.G_AV1=2;
+            WL.G_AV2=1;
+        else
+            WL.G_AV1=3;
+            WL.G_AV2=3;
+        end
+
+        if MR1>MR2 && (MR1)>(MR2+stdR2) && (MR1-stdR1)>(MR2);
+            WL.R_AV1=1;
+            WL.R_AV2=2;
+        elseif MR1<MR2 && (MR1)<(MR2-stdR2) && (MR1+stdR1)<(MR2);
+            WL.R_AV1=2;
+            WL.R_AV2=1;
+        else
+            WL.R_AV1=3;
+            WL.R_AV2=3;
+        end
+
+        if MC1<MC2 && (MC1)<(MC2-stdC2) && (MC1+stdC1)<(MC2);
+            WL.C_AV1=1; % Aggressor
+            WL.C_AV2=2; % Victim
+        elseif MC1>MC2 && (MC1)>(MC2+stdC2) && (MC1-stdC1)>(MC2);
+            WL.C_AV1=2;
+            WL.C_AV2=1;
+        else
+            WL.C_AV1=3; % Stable
+            WL.C_AV2=3;
+        end
+
+case 'ttest'
+        WL=struct;
+
+        [Et,~]=ttest2(E1,E2,'Vartype','unequal');
+        [Gt,~]=ttest2(G1,G2,'Vartype','unequal');  
+        [Rt,~]=ttest2(R1,R2,'Vartype','unequal');  
+        [Ct,~]=ttest2(C1,C2,'Vartype','unequal');    
+
+        if ME1<ME2 && Et~=0;
+            WL.E_AV1=1; % Aggressor
+            WL.E_AV2=2; % Victim
+        elseif ME1>ME2 && Et~=0;
+            WL.E_AV1=2;
+            WL.E_AV2=1;
+        else
+            WL.E_AV1=3; % Stable
+            WL.E_AV2=3;
+        end
+            
+        if MG1>MG2 && Gt~=0;
+            WL.G_AV1=1;
+            WL.G_AV2=2;
+        elseif MG1<MG2 && Gt~=0;
+            WL.G_AV1=2;
+            WL.G_AV2=1;
+        else
+            WL.G_AV1=3;
+            WL.G_AV2=3;
+        end
+
+        if MR1>MR2 && Rt~=0;
+            WL.R_AV1=1;
+            WL.R_AV2=2;
+        elseif MR1<MR2 && Rt~=0;
+            WL.R_AV1=2;
+            WL.R_AV2=1;
+        else
+            WL.R_AV1=3;
+            WL.R_AV2=3;
+        end
+
+        if MC1<MC2 && Ct~=0;
+            WL.C_AV1=1; % Aggressor
+            WL.C_AV2=2; % Victim
+        elseif MC1>MC2 && Ct~=0;
+            WL.C_AV1=2;
+            WL.C_AV2=1;
+        else
+            WL.C_AV1=3; % Stable
+            WL.C_AV2=3;
+        end
+
     case 'std_err'
         stdE1=std(E1)/sqrt(numel(E1)); stdG1=std(G1)/sqrt(numel(G1)); stdR1=std(R1)/sqrt(numel(R1)); stdC1=std(C1)/sqrt(numel(C1));
         stdE2=std(E2)/sqrt(numel(E2)); stdG2=std(G2)/sqrt(numel(G2)); stdR2=std(R2)/sqrt(numel(R2)); stdC2=std(C2)/sqrt(numel(C2));
+
+        WL=struct;
+
+        if ME1<ME2 && (ME1+stdE1)<(ME2-stdE2);
+            WL.E_AV1=1; % Aggressor
+            WL.E_AV2=2; % Victim
+        elseif ME1>ME2 && (ME1-stdE1)>(ME2+stdE2);
+            WL.E_AV1=2;
+            WL.E_AV2=1;
+        else
+            WL.E_AV1=3; % Stable
+            WL.E_AV2=3;
+        end
+            
+        if MG1>MG2 && (MG1-stdG1)>(MG2+stdG2);
+            WL.G_AV1=1;
+            WL.G_AV2=2;
+        elseif MG1<MG2 && (MG1+stdG1)<(MG2-stdG2);
+            WL.G_AV1=2;
+            WL.G_AV2=1;
+        else
+            WL.G_AV1=3;
+            WL.G_AV2=3;
+        end
+
+        if MR1>MR2 && (MR1-stdR1)>(MR2+stdR2);
+            WL.R_AV1=1;
+            WL.R_AV2=2;
+        elseif MR1<MR2 && (MR1+stdR1)<(MR2-stdR2);
+            WL.R_AV1=2;
+            WL.R_AV2=1;
+        else
+            WL.R_AV1=3;
+            WL.R_AV2=3;
+        end
+
+        if MC1<MC2 && (MC1+stdC1)<(MC2-stdC2);
+            WL.C_AV1=1; % Aggressor
+            WL.C_AV2=2; % Victim
+        elseif MC1>MC2 && (MC1-stdC1)>(MC2+stdC2);
+            WL.C_AV1=2;
+            WL.C_AV2=1;
+        else
+            WL.C_AV1=3; % Stable
+            WL.C_AV2=3;
+        end
+
     case 'bootstrap'
         stdE1=bootCI(E1); stdG1=bootCI(G1); stdR1=bootCI(R1); stdC1=bootCI(C1);
-        stdE2=bootCI(E2); stdG2=bootCI(G2); stdR2=bootCI(R2); stdC2=bootCI(C2);            
-    end
+        stdE2=bootCI(E2); stdG2=bootCI(G2); stdR2=bootCI(R2); stdC2=bootCI(C2);  
 
-    WL=struct;
+        WL=struct;
 
-    if ME1<ME2 && (ME1)<(ME2-stdE2) && (ME1+stdE1)<(ME2);
-        WL.E_AV1=1; % Aggressor
-        WL.E_AV2=2; % Victim
-        % WL.E_DLT=ME1-ME2;
-    elseif ME1>ME2 && (ME1)>(ME2+stdE2) && (ME1-stdE1)>(ME2);
-        WL.E_AV1=2;
-        WL.E_AV2=1;
-        % WL.E_DLT=ME2-ME1;
-    else
-        WL.E_AV1=3; % Stable
-        WL.E_AV2=3;
-        % WL.E_DLT=min([ME1 ME2]) - max([ME1 ME2]);
-    end
-    WL.E_DLT=ME1-ME2;
-    WL.E_UNC=sqrt((stdE1^2)+(stdE2^2));
-        
-    if MG1>MG2 && (MG1)>(MG2+stdG2) && (MG1-stdG1)>(MG2);
-        WL.G_AV1=1;
-        WL.G_AV2=2;
-        % WL.G_DLT=MG1-MG2;
-    elseif MG1<MG2 && (MG1)<(MG2-stdG2) && (MG1+stdG1)<(MG2);
-        WL.G_AV1=2;
-        WL.G_AV2=1;
-        % WL.G_DLT=MG2-MG1;
-    else
-        WL.G_AV1=3;
-        WL.G_AV2=3;
-        % WL.G_DLT=max([MG1 MG2])-min([MG1 MG2]);
-    end
-    WL.G_DLT=MG1-MG2;
-    WL.G_UNC=sqrt((stdG1^2)+(stdG2^2));
+        if ME1<ME2 && (ME1+stdE1)<(ME2-stdE2);
+            WL.E_AV1=1; % Aggressor
+            WL.E_AV2=2; % Victim
+        elseif ME1>ME2 && (ME1-stdE1)>(ME2+stdE2);
+            WL.E_AV1=2;
+            WL.E_AV2=1;
+        else
+            WL.E_AV1=3; % Stable
+            WL.E_AV2=3;
+        end
+            
+        if MG1>MG2 && (MG1-stdG1)>(MG2+stdG2);
+            WL.G_AV1=1;
+            WL.G_AV2=2;
+        elseif MG1<MG2 && (MG1+stdG1)<(MG2-stdG2);
+            WL.G_AV1=2;
+            WL.G_AV2=1;
+        else
+            WL.G_AV1=3;
+            WL.G_AV2=3;
+        end
 
-    if MR1>MR2 && (MR1)>(MR2+stdR2) && (MR1-stdR1)>(MR2);
-        WL.R_AV1=1;
-        WL.R_AV2=2;
-        % WL.R_DLT=MR1-MR2;
-    elseif MR1<MR2 && (MR1)<(MR2-stdR2) && (MR1+stdR1)<(MR2);
-        WL.R_AV1=2;
-        WL.R_AV2=1;
-        % WL.R_DTl=MR2-MR1;
-    else
-        WL.R_AV1=3;
-        WL.R_AV2=3;
-        % WL.R_DLT=max([MR1 MR2])-min([MR1 MR2]);
-    end
-    WL.R_DLT=MR1-MR2;
-    WL.R_UNC=sqrt((stdR1^2)+(stdR2^2));
+        if MR1>MR2 && (MR1-stdR1)>(MR2+stdR2);
+            WL.R_AV1=1;
+            WL.R_AV2=2;
+        elseif MR1<MR2 && (MR1+stdR1)<(MR2-stdR2);
+            WL.R_AV1=2;
+            WL.R_AV2=1;
+        else
+            WL.R_AV1=3;
+            WL.R_AV2=3;
+        end
 
-    if MC1<MC2 && (MC1)<(MC2-stdC2) && (MC1+stdC1)<(MC2);
-        WL.C_AV1=1; % Aggressor
-        WL.C_AV2=2; % Victim
-        % WL.C_DLT=MC1-MC2;
-    elseif MC1>MC2 && (MC1)>(MC2+stdC2) && (MC1-stdC1)>(MC2);
-        WL.C_AV1=2;
-        WL.C_AV2=1;
-        % WL.C_DLT=MC2-MC1;
-    else
-        WL.C_AV1=3; % Stable
-        WL.C_AV2=3;
-        % WL.C_DLT=min([MC1 MC2]) - max([MC1 MC2]);
+        if MC1<MC2 && (MC1+stdC1)<(MC2-stdC2);
+            WL.C_AV1=1; % Aggressor
+            WL.C_AV2=2; % Victim
+        elseif MC1>MC2 && (MC1-stdC1)>(MC2+stdC2);
+            WL.C_AV1=2;
+            WL.C_AV2=1;
+        else
+            WL.C_AV1=3; % Stable
+            WL.C_AV2=3;
+        end          
     end
-    WL.C_DLT=MC1-MC2;
-    WL.C_UNC=sqrt((stdC1^2)+(stdC2^2));
-
 end
 
 function [str]=OutputParser(WL,Ornt);
