@@ -1002,6 +1002,7 @@ function [head_vals]=AcrossDivide(DEM,FD,DS_OUT,varargin)
         DEMc=GRIDobj(DEM);
         DEMc.Z(DEMc.Z==0)=NaN;
         DEMc.Z(S.IXgrid)=zc;
+	A=flowacc(FD);
 
         w1=waitbar(0,'Extracting stream segments...');
         StreamSegments=struct;
@@ -1029,7 +1030,7 @@ function [head_vals]=AcrossDivide(DEM,FD,DS_OUT,varargin)
                 % Extract stream from channel head to outlet
                 Sn=modify(S,'downstreamto',IX);
 
-                C=chiplot(Sn,DEMc,A,'a0',1,'mn',theta_ref,'plot',false);
+                C=chiplot(Sn,DEMc,A,'a0',1,'mn',mn,'plot',false);
 
                 StreamSgmnts{ii}=Sn;
                 ChiSgmnts{ii}=C;
