@@ -10,6 +10,9 @@ function [ChiOBJ]=ChiGrid(DEM,FD,varargin)
 	% 	FD - FLOW object
 	%
 	% Optional Inputs:
+	%	file_name_prefix [] - name of output ascii file of the chi grid, if no input is provided the 
+	%			code will not save an output, but the chi grid (as a GRIDobj) will still be produced
+	%			in the workspace.
 	%	adjust_outlet_elevation [false] - if true will only calculate chi above a given minimum elevation, that you must provide as an argument to the 
 	%									'min_elevation' parameter.
 	%	min_elevation [] - parameter to set minimum elevation for outlet elevation if 'method' is set to 'elevation'
