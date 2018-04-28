@@ -3,8 +3,8 @@ function [OUT]=DivideStability(DEM,FD,varargin)
 	% fields for (1) channel elevation, (2) mean upstream gradient, (3) mean upstream local relief, and (4) chi. It also outputs a structure
 	% containing these values at channel heads. Structure is for use in the companion code 'AcrossDivide'. 
 	%
-	% If you use the result of this code in a publication, please cite Forte, A.M. & Whipple, K.X., In Review, Criteria and Tools for Determining
-	% Drainage Divide Stability, submitted to EPSL. And while it's in review, check out the supporting text in preprint form at https://eartharxiv.org/anr29
+   	% If you use the result of this code in a publication, please cite Forte, A.M. & Whipple, K.X., 2018, Criteria and Tools for Determining
+    	% Drainage Divide Stability, Earth and Planetary Science Letters, v.493, p.102-112, DOI:10.1016/j.epsl.2018.04.026
 	%
 	% Required Inputs:
 	% 		DEM - GRIDobj of the digital elevation model of your area loaded into the workspace
