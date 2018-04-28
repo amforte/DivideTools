@@ -5,8 +5,8 @@ function [head_vals]=AcrossDivide(DEM,FD,DS_OUT,varargin)
     % divide, see details of the 'outlet_method' parameter for more discussion. Produces a plot of across divide values and a table of values. Title of subplots will also specify
     % which direction the divide is predicted to move based on that metric. 
     %
-    % If you use the result of this code in a publication, please cite Forte, A.M. & Whipple, K.X., In Review, Criteria and Tools for Determining
-    % Drainage Divide Stability, submitted to EPSL.
+    % If you use the result of this code in a publication, please cite Forte, A.M. & Whipple, K.X., 2018, Criteria and Tools for Determining
+    % Drainage Divide Stability, Earth and Planetary Science Letters, v.493, p.102-112, DOI:10.1016/j.epsl.2018.04.026
     %
     % Required Inputs:
     %       DEM - GRIDobj of the digital elevation model of your area loaded into the workspace
