@@ -4,8 +4,8 @@ function AlongDividePlot(head_vals,varargin)
     % standard deviation values for both sides of a divide, (2) delta values for each of the four metrics along with propagated uncertainty, and (3)
     % a pseuod normalized delta plot (e.g. positive delta values for all metrics imply the same direction of divide motion).
     %
-    % If you use the result of this code in a publication, please cite Forte, A.M. & Whipple, K.X., In Review, Criteria and Tools for Determining
-    % Drainage Divide Stability, submitted to EPSL.
+    % If you use the result of this code in a publication, please cite Forte, A.M. & Whipple, K.X., 2018, Criteria and Tools for Determining
+    % Drainage Divide Stability, Earth and Planetary Science Letters, v.493, p.102-112, DOI:10.1016/j.epsl.2018.04.026
     %
     % Required Inputs:
     %       head_vals - output of 'AcrossDivide' function
