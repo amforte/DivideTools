@@ -21,7 +21,7 @@ function AlongDividePlot(head_vals,varargin)
     % Function Written by Adam M. Forte - Last Revised Spring 2018 %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-	p=inputParser;
+    p=inputParser;
     p.FunctionName = 'AlongDividePlot';
     addRequired(p,'head_vals',@(x) isnumeric(x) & size(x,2)==8 );
 
@@ -46,8 +46,8 @@ function AlongDividePlot(head_vals,varargin)
 	num_sides=unique(Div);
 	num_divides=max(num_sides)/2;
 
-    odds=[1:2:(num_divides*2)-1];
-    evens=[2:2:(num_divides*2)];
+    	odds=[1:2:(num_divides*2)-1];
+    	evens=[2:2:(num_divides*2)];
 
 	mo=zeros(num_divides,17);
 	tick_names=cell(1,num_divides);
@@ -484,6 +484,8 @@ function [WL]=WinnersLosers(E1,E2,G1,G2,R1,R2,C1,C2,wl_method)
             WL.E_AV1=3; % Stable
             WL.E_AV2=3;
         end
+        WL.E_DLT=ME1-ME2;
+        WL.E_UNC=sqrt((stdE1^2)+(stdE2^2));
             
         if MG1>MG2 && (MG1)>(MG2+stdG2) && (MG1-stdG1)>(MG2);
             WL.G_AV1=1;
@@ -495,6 +497,8 @@ function [WL]=WinnersLosers(E1,E2,G1,G2,R1,R2,C1,C2,wl_method)
             WL.G_AV1=3;
             WL.G_AV2=3;
         end
+        WL.G_DLT=MG1-MG2;
+        WL.G_UNC=sqrt((stdG1^2)+(stdG2^2));
 
         if MR1>MR2 && (MR1)>(MR2+stdR2) && (MR1-stdR1)>(MR2);
             WL.R_AV1=1;
@@ -506,6 +510,8 @@ function [WL]=WinnersLosers(E1,E2,G1,G2,R1,R2,C1,C2,wl_method)
             WL.R_AV1=3;
             WL.R_AV2=3;
         end
+        WL.R_DLT=MR1-MR2;
+        WL.R_UNC=sqrt((stdR1^2)+(stdR2^2));
 
         if MC1<MC2 && (MC1)<(MC2-stdC2) && (MC1+stdC1)<(MC2);
             WL.C_AV1=1; % Aggressor
@@ -517,14 +523,16 @@ function [WL]=WinnersLosers(E1,E2,G1,G2,R1,R2,C1,C2,wl_method)
             WL.C_AV1=3; % Stable
             WL.C_AV2=3;
         end
+        WL.C_DLT=MC1-MC2;
+        WL.C_UNC=sqrt((stdC1^2)+(stdC2^2));
 
-case 'ttest'
+    case 'ttest'
         WL=struct;
 
-        [Et,~]=ttest2(E1,E2,'Vartype','unequal');
-        [Gt,~]=ttest2(G1,G2,'Vartype','unequal');  
-        [Rt,~]=ttest2(R1,R2,'Vartype','unequal');  
-        [Ct,~]=ttest2(C1,C2,'Vartype','unequal');    
+        [Et,~,~,Estat]=ttest2(E1,E2,'Vartype','unequal');
+        [Gt,~,~,Gstat]=ttest2(G1,G2,'Vartype','unequal');  
+        [Rt,~,~,Rstat]=ttest2(R1,R2,'Vartype','unequal');  
+        [Ct,~,~,Cstat]=ttest2(C1,C2,'Vartype','unequal');    
 
         if ME1<ME2 && Et~=0;
             WL.E_AV1=1; % Aggressor
@@ -536,6 +544,8 @@ case 'ttest'
             WL.E_AV1=3; % Stable
             WL.E_AV2=3;
         end
+        WL.E_DLT=ME1-ME2;
+        WL.E_UNC=Estat.sd;
             
         if MG1>MG2 && Gt~=0;
             WL.G_AV1=1;
@@ -547,6 +557,8 @@ case 'ttest'
             WL.G_AV1=3;
             WL.G_AV2=3;
         end
+        WL.G_DLT=MG1-MG2;
+        WL.G_UNC=Gstat.sd;
 
         if MR1>MR2 && Rt~=0;
             WL.R_AV1=1;
@@ -558,6 +570,8 @@ case 'ttest'
             WL.R_AV1=3;
             WL.R_AV2=3;
         end
+        WL.R_DLT=MR1-MR2;
+        WL.R_UNC=Rstat.sd;
 
         if MC1<MC2 && Ct~=0;
             WL.C_AV1=1; % Aggressor
@@ -569,6 +583,8 @@ case 'ttest'
             WL.C_AV1=3; % Stable
             WL.C_AV2=3;
         end
+        WL.C_DLT=MC1-MC2;
+        WL.C_UNC=Cstat.sd;
 
     case 'std_err'
         stdE1=std(E1)/sqrt(numel(E1)); stdG1=std(G1)/sqrt(numel(G1)); stdR1=std(R1)/sqrt(numel(R1)); stdC1=std(C1)/sqrt(numel(C1));
@@ -586,6 +602,8 @@ case 'ttest'
             WL.E_AV1=3; % Stable
             WL.E_AV2=3;
         end
+        WL.E_DLT=ME1-ME2;
+        WL.E_UNC=sqrt((stdE1^2)+(stdE2^2));
             
         if MG1>MG2 && (MG1-stdG1)>(MG2+stdG2);
             WL.G_AV1=1;
@@ -597,6 +615,8 @@ case 'ttest'
             WL.G_AV1=3;
             WL.G_AV2=3;
         end
+        WL.G_DLT=MG1-MG2;
+        WL.G_UNC=sqrt((stdG1^2)+(stdG2^2));
 
         if MR1>MR2 && (MR1-stdR1)>(MR2+stdR2);
             WL.R_AV1=1;
@@ -608,6 +628,8 @@ case 'ttest'
             WL.R_AV1=3;
             WL.R_AV2=3;
         end
+        WL.R_DLT=MR1-MR2;
+        WL.R_UNC=sqrt((stdR1^2)+(stdR2^2));
 
         if MC1<MC2 && (MC1+stdC1)<(MC2-stdC2);
             WL.C_AV1=1; % Aggressor
@@ -619,6 +641,8 @@ case 'ttest'
             WL.C_AV1=3; % Stable
             WL.C_AV2=3;
         end
+        WL.C_DLT=MC1-MC2;
+        WL.C_UNC=sqrt((stdC1^2)+(stdC2^2));
 
     case 'bootstrap'
         stdE1=bootCI(E1); stdG1=bootCI(G1); stdR1=bootCI(R1); stdC1=bootCI(C1);
@@ -636,6 +660,8 @@ case 'ttest'
             WL.E_AV1=3; % Stable
             WL.E_AV2=3;
         end
+        WL.E_DLT=ME1-ME2;
+        WL.E_UNC=sqrt((stdE1^2)+(stdE2^2));
             
         if MG1>MG2 && (MG1-stdG1)>(MG2+stdG2);
             WL.G_AV1=1;
@@ -647,6 +673,8 @@ case 'ttest'
             WL.G_AV1=3;
             WL.G_AV2=3;
         end
+        WL.G_DLT=MG1-MG2;
+        WL.G_UNC=sqrt((stdG1^2)+(stdG2^2));
 
         if MR1>MR2 && (MR1-stdR1)>(MR2+stdR2);
             WL.R_AV1=1;
@@ -658,6 +686,8 @@ case 'ttest'
             WL.R_AV1=3;
             WL.R_AV2=3;
         end
+        WL.R_DLT=MR1-MR2;
+        WL.R_UNC=sqrt((stdR1^2)+(stdR2^2));
 
         if MC1<MC2 && (MC1+stdC1)<(MC2-stdC2);
             WL.C_AV1=1; % Aggressor
@@ -668,7 +698,9 @@ case 'ttest'
         else
             WL.C_AV1=3; % Stable
             WL.C_AV2=3;
-        end          
+        end 
+        WL.C_DLT=MC1-MC2;
+        WL.C_UNC=sqrt((stdC1^2)+(stdC2^2));         
     end
 end
 
