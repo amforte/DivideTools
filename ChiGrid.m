@@ -2,8 +2,8 @@ function [ChiOBJ]=ChiGrid(DEM,FD,varargin)
 	% Function to produce a continuous chi grid. Has the similar options for controling outlet elevations and network
 	% completeness as the companion code 'SetOutlet' which is designed to modify a stream network.
 	%
-    	% If you use the result of this code in a publication, please cite Forte, A.M. & Whipple, K.X., 2018, Criteria and Tools for Determining
-    	% Drainage Divide Stability, Earth and Planetary Science Letters, v.493, p.102-112, DOI:10.1016/j.epsl.2018.04.026
+    % If you use the result of this code in a publication, please cite Forte, A.M. & Whipple, K.X., 2018, Criteria and Tools for Determining
+    % Drainage Divide Stability, Earth and Planetary Science Letters, v.493, p.102-112, DOI:10.1016/j.epsl.2018.04.026
 	%
 	% Reqiured Inputs:
 	% 	DEM - DEM Grid Object (assumes unconditioned DEM)
@@ -13,10 +13,10 @@ function [ChiOBJ]=ChiGrid(DEM,FD,varargin)
 	%	file_name_prefix [] - name of output ascii file of the chi grid, if no input is provided the 
 	%			code will not save an output, but the chi grid (as a GRIDobj) will still be produced
 	%			in the workspace.
-	%	adjust_outlet_elevation [false] - if true will only calculate chi above a given minimum elevation, that you must provide as an argument to the 
-	%									'min_elevation' parameter.
-	%	min_elevation [] - parameter to set minimum elevation for outlet elevation if 'method' is set to 'elevation'
-	%	complete_networks_only [true] - if true (default) the code will only populate portions of the stream network that are complete
+	%	min_elevation [] - parameter to set minimum elevation for calculating chi
+	%	complete_networks_only [true] - if true (default) the code will only populate portions of the stream network that are complete. Generally, this
+	%			option should probably be left as true (i.e. chi will not be accurate if drainage area is not accurate), but this can be overly agressive
+	%			on certain DEMs and when used in tandem with 'min_elevation', it can be slow to calculate as it requires recalculation of the FLOWobj
 	%	chi_ref_area [1] - reference area for calculating chi, setting this value to 1 will ensure that slope of the chi-z relationship is equivalent to 
 	%			to ksn, but for this function, this value doesn't matter too much
 	%	theta_ref [0.5] - reference concavity for calculating chi
@@ -26,7 +26,7 @@ function [ChiOBJ]=ChiGrid(DEM,FD,varargin)
 	%	[CHI]=ChiGrid(DEM,FD,'adjust_outlet_elevation',true,'min_elevation',500);
 	%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	% Function Written by Adam M. Forte - Last Revised Winter 2017 %
+	% Function Written by Adam M. Forte - Last Revised Spring 2018 %
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 	% Parse Inputs
@@ -38,7 +38,6 @@ function [ChiOBJ]=ChiGrid(DEM,FD,varargin)
 	addParamValue(p,'file_name_prefix',[],@(x) ischar(x));
 	addParamValue(p,'theta_ref',0.5,@(x) isscalar(x) && isnumeric(x));
 	addParamValue(p,'chi_ref_area',1,@(x) isscalar(x) && isnumeric(x));
-	addParamValue(p,'adjust_outlet_elevation',false,@(x) isscalar(x) && islogical(x));
 	addParamValue(p,'complete_networks_only',true,@(x) isscalar(x) && islogical(x));
 	addParamValue(p,'min_elevation',[],@(x) isnumeric(x));
 
@@ -49,15 +48,16 @@ function [ChiOBJ]=ChiGrid(DEM,FD,varargin)
 	fnp=p.Results.file_name_prefix;
 	mn=p.Results.theta_ref;
 	a0=p.Results.chi_ref_area;
-	abl=p.Results.adjust_outlet_elevation;
 	me=p.Results.min_elevation;
 	cno=p.Results.complete_networks_only;
 
-	if abl & isempty(me)
-		error('Must provide a minimum eleavtion if Adjust Base Level option is true');
+	if isempty(me)
+		abl=false;
+	else
+		abl=true;
 	end
 
-	if cno
+	if cno && ~abl
 		% Find nodes influenced by edge (From Topotoolbox blog)
 		IXE = GRIDobj(DEM,'logical');
 		IXE.Z(:,:) = true;
@@ -76,12 +76,58 @@ function [ChiOBJ]=ChiGrid(DEM,FD,varargin)
 		idxi=ismember(DB.Z(oixi),dbL);
 		oixi(idxi)=[];
 		% Remove drainage basins based on this
-		mask=dependencemap(FD,oixi);
-		DEM.Z(~mask.Z)=NaN;
-	end
-	
-	% Extract info from FLOWobj		
-	if ~abl
+		W=dependencemap(FD,oixi);
+		% DEM.Z(~mask.Z)=NaN;
+		% % Extract info from FLOWobj		
+		% W=~isnan(DEM);
+		I=W.Z(FD.ix);
+		ix=double(FD.ix(I));
+		ixc=double(FD.ixc(I));
+		% Recalculate indices
+		IX        = zeros(FD.size,'uint32');
+		IX(W.Z)   = 1:nnz(W.Z);
+		ix      = double(IX(ix));
+		ixc     = double(IX(ixc));
+		I          = ixc == 0;
+		ix(I)    = [];
+		ixc(I)   = [];
+	elseif cno && abl
+		% Recalculate flow directions after removing portions below min elevation
+		IX=DEM>me;
+		DEM.Z(IX.Z==false)=NaN;
+		FD=FLOWobj(DEM,'preprocess','carve');
+		% Find nodes influenced by edge (From Topotoolbox blog)
+		IXE = GRIDobj(DEM,'logical');
+		IXE.Z(:,:) = true;
+		IXE.Z(2:end-1,2:end-1) = false;
+		IXE = influencemap(FD,IXE);
+		% Rest is mine
+		% Find drainage basins and all outlets
+		[DB,oixi]=drainagebasins(FD);
+		% Find where these share pixels other than the edge
+		db=DB.Z; db=db(3:end-2,3:end-2); % Move 2 pixels in to be conservative
+		ixe=IXE.Z; ixe=ixe(3:end-2,3:end-2); % Move 2 pixels in to be conservative
+		dbL=db(ixe);
+		% Compile list of drainage basins that are influenced by edge pixels
+		dbL=unique(dbL);
+		% Index list of outlets based on this
+		idxi=ismember(DB.Z(oixi),dbL);
+		oixi(idxi)=[];
+		% Find offending drainage basins and recalculate indicies
+		W=dependencemap(FD,oixi);
+		I=W.Z(FD.ix);
+		ix=double(FD.ix(I));
+		ixc=double(FD.ixc(I));
+		% Recalculate indices
+		IX        = zeros(FD.size,'uint32');
+		IX(W.Z)   = 1:nnz(W.Z);
+		ix      = double(IX(ix));
+		ixc     = double(IX(ixc));
+		I          = ixc == 0;
+		ix(I)    = [];
+		ixc(I)   = [];
+	elseif ~cno && ~abl
+		% Extract info from FLOWobj	
 		W=~isnan(DEM);
 		I=W.Z(FD.ix);
 		ix=double(FD.ix(I));
@@ -94,7 +140,7 @@ function [ChiOBJ]=ChiGrid(DEM,FD,varargin)
 		I          = ixc == 0;
 		ix(I)    = [];
 		ixc(I)   = [];
-	elseif abl
+	elseif ~cno && abl
 		W=DEM>me;
 		I=W.Z(FD.ix);
 		ix=double(FD.ix(I));
@@ -134,39 +180,7 @@ function [ChiOBJ]=ChiGrid(DEM,FD,varargin)
 	ChiOBJ.Z(IXgrid)=c;
 
 
-	if abl
-		% Remove portions of networks that drain to the edge and are above min elevation
-		nrc = numel(x);
-		M  = sparse(double(ix),double(ixc),true,nrc,nrc);
-		V = (sum(M,2)==0) & (sum(M,1)'~=0);
-		oix   = find(V);
-		oix   = oix(:);
-		oix  = IXgrid(oix);
-		[cx,cy]=ind2coord(DEM,oix);
-		coxy=[cx cy];
-
-		out_els=DEM.Z(oix);
-
-		[xo,yo]=getoutline(DEM,true);
-
-		sz=size(xo);
-		if sz(1)==1 & sz(2)>1
-			[oxy]=[xo' yo'];
-		elseif sz(2)==1 & sz(1)>1
-			[oxy]=[xo yo];
-		end
-
-		idx=out_els>me & ismember(coxy,oxy,'rows');
-		oix(idx)=[]; % Remove outlets that are above the minimum elevation and along the edge of the DEM
-
-		DM=dependencemap(FD,oix);
-		DM.Z=double(DM.Z);
-		DM.Z(DM.Z==0)=NaN;
-		ChiOBJ=ChiOBJ.*DM;
-	end
-
 	if ~isempty(fnp)
 		GRIDobj2ascii(ChiOBJ,[fnp '_chigrid.txt']);
 	end
 end
-
