@@ -62,29 +62,9 @@ function [SC]=SetOutlet(DEM,FD,A,S,method,varargin)
 		error('Cannot set method to complete_only and set complete_network_only to false');
 	end
 
-	if cno % Remove portions of the DEM that are not complete networks
-		% Find nodes influenced by edge (from TopoToolbox blog)
-		IXE = GRIDobj(DEM,'logical');
-		IXE.Z(:,:) = true;
-		IXE.Z(2:end-1,2:end-1) = false;
-		IXE = influencemap(FD,IXE);
-		% Rest is mine
-		% Find drainage basins and all outlets
-		[DB,oixi]=drainagebasins(FD);
-		% Find where these share pixels other than the edge
-		db=DB.Z; db=db(3:end-2,3:end-2); % Move 2 pixels in to be conservative
-		ixe=IXE.Z; ixe=ixe(3:end-2,3:end-2); % Move 2 pixels in to be conservative
-		dbL=db(ixe);
-		% Compile list of drainage basins that are influenced by edge pixels
-		dbL=unique(dbL);
-		% Index list of outlets based on this
-		idxi=ismember(DB.Z(oixi),dbL);
-		oixi(idxi)=[];
-		% Remove drainage basins based on this
-		mask=dependencemap(FD,oixi);
-		DEM.Z(~mask.Z)=NaN;
+	if cno & ~strcmp(method,'complete_networks_only')
+		S=removeedgeeffects(S,FD,DEM);
 	end
-
 
 	%% Initiate graphical picker if no values for either min drainage area or min elevation are provided
 	if strcmp(method,'elevation') & isempty(me)
@@ -148,11 +128,6 @@ function [SC]=SetOutlet(DEM,FD,A,S,method,varargin)
 		W.Z=logical(W.Z);
 		SC=STREAMobj(FD,W);
 	case 'complete_only'
-		IX=S.IXgrid;
-		W=GRIDobj(DEM);
-		W.Z(IX)=1;
-		W.Z=logical(W.Z);
-		IDX=isnan(DEM);
-		W.Z(IDX.Z)=false;
-		SC=STREAMobj(FD,W);
+		SC=removeedgeeffects(S,FD,DEM);
 	end
+end

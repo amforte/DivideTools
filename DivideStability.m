@@ -129,8 +129,7 @@ function [OUT]=DivideStability(DEM,FD,varargin)
 		waitbar(5/12,w1,'Calculating chi');
 	end	
 	A=flowacc(FD);
-	DA=A.*(DEM.cellsize^2);
-	c=chitransform(S,DA,'a0',chi_ref_area,'mn',theta_ref);
+	c=chitransform(S,A,'a0',chi_ref_area,'mn',theta_ref);
 	CHI=GRIDobj(DEM);
 	CHI.Z(S.IXgrid)=c;
 
