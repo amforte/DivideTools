@@ -517,10 +517,15 @@ end
 function [p1,p2,ab1,ab2]=DivideOrient(x1,y1,x2,y2);
 	x1=double(x1); y1=double(y1);
 	x2=double(x2); y2=double(y2);
-    f1=fit(x1,y1,'poly1');
-    f2=fit(x2,y2,'poly1');
-
-    ms=(f1.p1+f2.p1)/2;
+    try
+	    f1=fit(x1,y1,'poly1');
+	    f2=fit(x2,y2,'poly1');
+	    ms=(f1.p1+f2.p1)/2;
+	catch
+	    B1=[ones(size(x1)) x1]\y1;
+	    B2=[ones(size(x2)) x2]\y2;
+	    ms=(B1(2)+B2(2))/2;
+	end
 
     ang=rad2deg(atan(1/ms));
     if ang>-22.5 & ang<22.5

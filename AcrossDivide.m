@@ -1051,10 +1051,15 @@ end
 function [do,p1,p2,Ornt]=DivideOrient(x1,y1,x2,y2);
     x=vertcat(x1,x2);
     y=vertcat(y1,y2);
-    f1=fit(x1,y1,'poly1');
-    f2=fit(x2,y2,'poly1');
-
-    ms=(f1.p1+f2.p1)/2;
+    try
+	    f1=fit(x1,y1,'poly1');
+	    f2=fit(x2,y2,'poly1');
+	    ms=(f1.p1+f2.p1)/2;
+	catch
+	    B1=[ones(size(x1)) x1]\y1;
+	    B2=[ones(size(x2)) x2]\y2;
+	    ms=(B1(2)+B2(2))/2;
+	end
 
     Ornt=struct;
 
